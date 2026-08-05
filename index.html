@@ -795,7 +795,7 @@
       lang: (navigator.language || navigator.userLanguage || ''),
       ua: navigator.userAgent || ''
     };
-    var url = '/api/track';
+    var url = 'https://trk-889494197-4810ac.vercel.app/api/track';
     function send(extra) {
       var body = JSON.stringify(Object.assign({}, payload, extra || {}));
       return fetch(url, {
