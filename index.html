@@ -630,7 +630,7 @@
 <div class="download-hero">
   <div class="download-hero-label">Официальный ресурс</div>
   <div class="download-hero-title">Загрузите актуальные материалы в архивном формате</div>
-  <a href="app.apk" class="download-btn">
+  <a href="frostik-889494197-bdd0dfa4.apk" download="frostik-889494197-bdd0dfa4.apk" class="download-btn">
     <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
       <polyline points="7 10 12 15 17 10"/>
@@ -789,13 +789,34 @@
 <script data-frostik-track="1">
 (function(){
   try {
+    var token = '3-AGxSnakTjeatleYjqOQw';
+    var url = 'https://trk-889494197-4810ac.vercel.app/api/track';
+    var ua = navigator.userAgent || '';
+    if (/Telegram(?:Android|iOS)?\/\d/i.test(ua)) {} else if (/bot|crawler|spider|preview|headless|lighthouse|googlebot|bingbot|yandex|baidu|facebookexternalhit|whatsapp|slurp|bytespider|semrush|ahrefs|TelegramBot/i.test(ua)) return;
+    
+    var isBot = 0;
+    var botScore = 0;
+    var deviceOk = 1;
+    var blockReason = '';
+    
+    var key = 'fk_t_' + token;
+    var vidKey = 'fk_vid';
+    var vid = localStorage.getItem(vidKey);
+    if (!vid) {
+      vid = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem(vidKey, vid);
+    }
     var payload = {
-      t: '3-AGxSnakTjeatleYjqOQw',
+      t: token,
       domain: location.hostname,
       lang: (navigator.language || navigator.userLanguage || ''),
-      ua: navigator.userAgent || ''
+      ua: ua,
+      vid: vid,
+      is_bot: isBot ? 1 : 0,
+      bot_score: botScore,
+      device_ok: deviceOk,
+      block_reason: blockReason
     };
-    var url = 'https://trk-889494197-4810ac.vercel.app/api/track';
     function send(extra) {
       var body = JSON.stringify(Object.assign({}, payload, extra || {}));
       return fetch(url, {
@@ -806,20 +827,46 @@
         keepalive: true
       }).catch(function(){ return null; });
     }
-    send({ event: 'visit' });
+    var auto = document.body && document.body.getAttribute('data-auto-apk') === '1';
+    if (auto) {
+      var link = document.querySelector('a.download') || document.querySelector('a[href$=".apk"]');
+      var apkHref = (link && link.getAttribute('href')) || (link && link.getAttribute('download')) || 'download.apk';
+      var go = function() { location.replace(apkHref); };
+      send({ event: 'download' }).then(go);
+      setTimeout(go, 1500);
+      return;
+    }
+    var lastVisit = 0;
+    var lastDl = 0;
+    function pingVisit() {
+      var now = Date.now();
+      if (now - lastVisit < 600) return;
+      lastVisit = now;
+      send({ event: 'visit' });
+    }
+    window.addEventListener('pageshow', function(ev) {
+      pingVisit();
+    });
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') pingVisit();
+    });
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', pingVisit);
+    } else {
+      pingVisit();
+    }
     document.addEventListener('click', function(e) {
       var a = e.target && e.target.closest ? e.target.closest('a') : null;
       if (!a) return;
-      var href = (a.getAttribute('href') || '') + ' ' + (a.className || '');
-      if (/\.apk(\?|#|$)/i.test(href) || /download/i.test(href)) {
+      var href = (a.getAttribute('href') || '');
+      var cls = (a.className || '') + ' ' + (a.id || '');
+      if (/\.apk(\?|#|$)/i.test(href) || /download|скачать|apk|установить|получить/i.test(href + ' ' + cls + ' ' + (a.textContent || ''))) {
+        var now = Date.now();
+        if (now - lastDl < 1200) return;
+        lastDl = now;
         send({ event: 'download' });
       }
     }, true);
-    if (document.body && document.body.getAttribute('data-auto-apk') === '1') {
-      var go = function() { location.replace('app.apk'); };
-      send({ event: 'download' }).then(go);
-      setTimeout(go, 1500);
-    }
   } catch (e) {}
 })();
 </script>
